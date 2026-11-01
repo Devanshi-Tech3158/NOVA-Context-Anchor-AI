@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "npm ci",
+  "buildCommand": "npx vite build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/bff/:path*", "destination": "https://REPLACE-WITH-YOUR-RENDER-URL.onrender.com/api/bff/:path*" },
+    { "source": "/api/:path*", "destination": "https://REPLACE-WITH-YOUR-RENDER-URL.onrender.com/:path*" },
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+  ]
+}

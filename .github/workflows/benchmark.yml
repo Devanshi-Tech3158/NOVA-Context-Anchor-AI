@@ -1,0 +1,105 @@
+name: benchmark
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      n:
+        description: "Number of cases"
+        required: false
+        default: "150"
+      split:
+        description: "Dataset split (dev/test)"
+        required: false
+        default: "dev"
+      systems:
+        description: "Comma-separated systems (baseline,rag,anchor)"
+        required: false
+        default: "baseline,rag"
+      llm:
+        description: "LLM mode (fake/real)"
+        required: false
+        default: "real"
+      seed:
+        description: "Random seed"
+        required: false
+        default: "7"
+
+jobs:
+  benchmark-pr:
+    name: Benchmark (PR smoke run)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e .
+
+      - name: Run benchmark (fake LLM, n=30, dev split)
+        run: |
+          python -m benchmark.runner \
+            --seed 7 \
+            --n 30 \
+            --split dev \
+            --systems baseline,rag \
+            --llm fake \
+            --limit 30
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-pr-results
+          path: benchmark/results/
+          retention-days: 7
+
+  benchmark-full:
+    name: Benchmark (full manual run)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e .
+
+      - name: Restore LLM response cache
+        uses: actions/cache@v4
+        with:
+          path: benchmark/.cache/
+          key: llm-cache-${{ github.sha }}
+          restore-keys: |
+            llm-cache-
+
+      - name: Run benchmark
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python -m benchmark.runner \
+            --seed ${{ github.event.inputs.seed || '7' }} \
+            --n ${{ github.event.inputs.n || '150' }} \
+            --split ${{ github.event.inputs.split || 'dev' }} \
+            --systems ${{ github.event.inputs.systems || 'baseline,rag' }} \
+            --llm ${{ github.event.inputs.llm || 'real' }}
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-full-results
+          path: benchmark/results/
+          retention-days: 30

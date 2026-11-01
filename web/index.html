@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOVA — Context Anchor AI</title>
+  <meta name="description" content="External Source-Linked Memory + Evidence-Checked Answers for AI Agents. Built for Build With NOVA Hackathon.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚓</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            nova: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              900: '#134e4a',
+              950: '#042f2e',
+            },
+            dark: {
+              bg: '#0b0f19',
+              card: '#111827',
+              border: '#1f2937',
+              muted: '#374151'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+    .glass { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .tab-active { border-color: #2dd4bf; color: #2dd4bf; background: rgba(45, 212, 191, 0.08); }
+  </style>
+</head>
+<body class="bg-dark-bg text-slate-100 min-h-screen flex flex-col selection:bg-teal-500 selection:text-white">
+
+  <!-- Top Announcement Bar -->
+  <header class="border-b border-dark-border bg-dark-card/60 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="size-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-teal-500/20">
+          ⚓
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-teal-300 via-teal-200 to-white bg-clip-text text-transparent">NOVA</span>
+            <span class="text-xs px-2 py-0.5 rounded-full font-semibold bg-teal-500/10 text-teal-300 border border-teal-500/30">Context Anchor</span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">Source-Linked Memory + Evidence-Checked Answers</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3 text-xs">
+        <div class="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300">
+          <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="backendStatusLabel">Live Mode</span>
+        </div>
+        <span class="hidden md:inline-flex px-2.5 py-1 rounded-full bg-purple-900/30 border border-purple-500/30 text-purple-300 font-medium">
+          🏆 Build With NOVA Hackathon
+        </span>
+        <a href="https://github.com/Devanshi-Tech3158/nova" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 flex items-center space-x-1.5 transition">
+          <svg class="size-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Header -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            Context Anchor AI Control Center
+          </h1>
+          <p class="mt-2 text-slate-400 text-sm sm:text-base max-w-2xl">
+            External, source-linked memory extraction, temporal supersession, and deterministic evidence-checked answers. Absence of evidence is strictly <span class="text-amber-400 font-semibold">unsupported</span>, never contradicted.
+          </p>
+        </div>
+        
+        <!-- API Endpoint Switcher -->
+        <div class="glass p-3 rounded-2xl flex flex-col gap-2 min-w-[280px]">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span class="font-semibold uppercase tracking-wider">Target API Host</span>
+            <button id="btnHealth" class="text-teal-400 hover:text-teal-300 font-medium">Ping /healthz</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <input id="apiBaseUrl" type="text" value="" placeholder="http://127.0.0.1:8000" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-400">
+            <button id="btnSaveHost" class="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0">Set</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="mt-8 border-b border-dark-border flex space-x-2 overflow-x-auto pb-px">
+        <button onclick="switchTab('tab-ingest')" id="nav-ingest" class="tab-btn px-4 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2 tab-active">
+          <span>📥</span>
+          <span>1. Ingest Memories</span>
+        </button>
+        <button onclick="switchTab('tab-ask')" id="nav-ask" class="tab-btn px-4 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2">
+          <span>❓</span>
+          <span>2. Ask & Reason</span>
+        </button>
+        <button onclick="switchTab('tab-verify')" id="nav-verify" class="tab-btn px-4 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2">
+          <span>⚖️</span>
+          <span>3. Verify Claims</span>
+        </button>
+        <button onclick="switchTab('tab-audit')" id="nav-audit" class="tab-btn px-4 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2">
+          <span>📜</span>
+          <span>4. Audit Trail</span>
+        </button>
+        <button onclick="switchTab('tab-docs')" id="nav-docs" class="tab-btn px-4 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center space-x-2">
+          <span>🔌</span>
+          <span>5. Architecture & API</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 1: INGEST MEMORIES -->
+    <div id="tab-ingest" class="tab-content space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 space-y-4">
+          <div class="glass p-5 rounded-2xl">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>Conversation Messages</span>
+                <span class="text-xs text-slate-400 font-normal">POST /ingest</span>
+              </h2>
+              <div class="flex gap-2">
+                <button onclick="loadSampleIngest('postgres')" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700">Sample: Postgres Setup</button>
+                <button onclick="loadSampleIngest('reversal')" class="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700">Sample: DB Reversal</button>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Session ID</label>
+                <input id="ingestSessionId" type="text" value="session-nova-01" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-400 font-mono">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Messages (JSON format)</label>
+                <textarea id="ingestMessagesJson" rows="8" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-white font-mono focus:outline-none focus:border-teal-400 leading-relaxed"></textarea>
+              </div>
+
+              <div class="pt-2 flex items-center justify-between">
+                <button id="btnIngest" onclick="triggerIngest()" class="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/20 transition flex items-center space-x-2">
+                  <span>Extract & Ingest Memories</span>
+                  <span>→</span>
+                </button>
+                <span id="ingestSpinner" class="hidden text-xs text-teal-400 animate-pulse">Processing extraction...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 space-y-4">
+          <div class="glass p-5 rounded-2xl min-h-[380px] flex flex-col">
+            <h2 class="text-base font-bold text-white mb-3 flex items-center justify-between">
+              <span>Ingestion Report</span>
+              <span id="ingestBadge" class="text-xs px-2 py-0.5 rounded font-mono bg-slate-800 text-slate-400">Idle</span>
+            </h2>
+
+            <div id="ingestMetrics" class="grid grid-cols-3 gap-3 mb-4">
+              <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center">
+                <p class="text-xs text-slate-400">Added</p>
+                <p id="metricAdded" class="text-xl font-extrabold text-emerald-400">0</p>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center">
+                <p class="text-xs text-slate-400">Superseded</p>
+                <p id="metricSuperseded" class="text-xl font-extrabold text-amber-400">0</p>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-center">
+                <p class="text-xs text-slate-400">Dropped</p>
+                <p id="metricDropped" class="text-xl font-extrabold text-slate-400">0</p>
+              </div>
+            </div>
+
+            <div class="flex-1 flex flex-col">
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Active Stored Memories</p>
+              <div id="memoryList" class="flex-1 overflow-y-auto space-y-2 max-h-[320px] pr-1">
+                <div class="text-xs text-slate-500 italic p-4 text-center border border-dashed border-slate-800 rounded-xl">
+                  No memories ingested in this session yet. Run an ingestion to see memories with provenance links.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: ASK & REASON -->
+    <div id="tab-ask" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-6 space-y-4">
+          <div class="glass p-5 rounded-2xl">
+            <h2 class="text-base font-bold text-white mb-3 flex items-center justify-between">
+              <span>Query Context Anchor</span>
+              <span class="text-xs text-slate-400 font-normal">POST /ask</span>
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Question</label>
+                <input id="askQuestion" type="text" value="Which database did the team decide to use for storage?" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-400">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Optional Draft Answer (To Verify / Qualify)</label>
+                <input id="askDraftAnswer" type="text" placeholder="e.g. We chose PostgreSQL for storage" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-400">
+              </div>
+
+              <div class="flex flex-wrap gap-2 text-xs">
+                <button onclick="setAsk('Which database did the team decide to use for storage?')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-teal-300">Prompt: Target DB</button>
+                <button onclick="setAsk('What port does our backend service listen on?')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-teal-300">Prompt: Port</button>
+                <button onclick="setAsk('What is our cloud provider budget?')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-amber-300">Prompt: Unanswerable</button>
+              </div>
+
+              <div class="pt-2">
+                <button onclick="triggerAsk()" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/20 transition">
+                  Run Grounded QA Pipeline
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 space-y-4">
+          <div class="glass p-5 rounded-2xl min-h-[380px] flex flex-col">
+            <h2 class="text-base font-bold text-white mb-3 flex items-center justify-between">
+              <span>Decision Verdict</span>
+              <span id="decisionActionBadge" class="text-xs px-2.5 py-1 rounded-full font-bold bg-slate-800 text-slate-400 font-mono">Waiting</span>
+            </h2>
+
+            <div class="space-y-4 flex-1">
+              <div>
+                <p class="text-xs font-semibold text-slate-400 mb-1">Final Answer</p>
+                <div id="finalAnswerBox" class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-sm font-medium text-slate-200 min-h-[50px] flex items-center">
+                  Submit a query to evaluate grounded answer.
+                </div>
+              </div>
+
+              <div>
+                <p class="text-xs font-semibold text-slate-400 mb-1">Evidence Verdicts & Rationale</p>
+                <div id="verdictsList" class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                  <p class="text-xs text-slate-500 italic">No query executed yet.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: VERIFY CLAIMS -->
+    <div id="tab-verify" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-6 space-y-4">
+          <div class="glass p-5 rounded-2xl">
+            <h2 class="text-base font-bold text-white mb-3 flex items-center justify-between">
+              <span>Answer Verification Engine</span>
+              <span class="text-xs text-slate-400 font-normal">POST /verify</span>
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Context Question</label>
+                <input id="verifyQuestion" type="text" value="What database did we pick?" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-400">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1">Answer to Verify (Can contain multiple compound claims)</label>
+                <textarea id="verifyAnswer" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-teal-400">We decided to use PostgreSQL for our database and it runs on port 5432.</textarea>
+              </div>
+
+              <div class="flex flex-wrap gap-2 text-xs">
+                <button onclick="setVerify('What database did we pick?', 'We decided to use PostgreSQL for our database.', 'supported')" class="px-2.5 py-1 rounded bg-emerald-950 border border-emerald-500/40 text-emerald-300">Test: Supported Answer</button>
+                <button onclick="setVerify('What database did we pick?', 'We chose MongoDB for our document store.', 'contradicted')" class="px-2.5 py-1 rounded bg-rose-950 border border-rose-500/40 text-rose-300">Test: Contradicted Answer</button>
+                <button onclick="setVerify('What is our server budget?', 'Our budget is $50,000 per month.', 'unsupported')" class="px-2.5 py-1 rounded bg-amber-950 border border-amber-500/40 text-amber-300">Test: Unsupported Answer</button>
+              </div>
+
+              <div class="pt-2">
+                <button onclick="triggerVerify()" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-teal-500/20 transition">
+                  Run Multi-Claim Verification
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 space-y-4">
+          <div class="glass p-5 rounded-2xl min-h-[380px] flex flex-col">
+            <h2 class="text-base font-bold text-white mb-3 flex items-center justify-between">
+              <span>Verification Results</span>
+              <span id="verifyActionBadge" class="text-xs px-2.5 py-1 rounded-full font-bold bg-slate-800 text-slate-400 font-mono">Ready</span>
+            </h2>
+
+            <div class="space-y-4 flex-1">
+              <div>
+                <p class="text-xs font-semibold text-slate-400 mb-1">Enforced Action Outcome</p>
+                <div id="verifyOutcomeBox" class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-sm font-semibold text-white">
+                  Awaiting verification input...
+                </div>
+              </div>
+
+              <div>
+                <p class="text-xs font-semibold text-slate-400 mb-1">Atomic Claims Breakdown & Labeling</p>
+                <div id="verifyClaimsList" class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                  <p class="text-xs text-slate-500 italic">No verification run yet.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: AUDIT TRAIL -->
+    <div id="tab-audit" class="tab-content hidden space-y-6">
+      <div class="glass p-5 rounded-2xl">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-base font-bold text-white">Tamper-Evident Audit Trail</h2>
+            <p class="text-xs text-slate-400">Inspect cryptographic records of every query, claim judgment, and decision action.</p>
+          </div>
+          <button onclick="refreshAuditTrail()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 flex items-center gap-1.5">
+            <span>🔄</span> Refresh
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/80 text-slate-400 font-mono border-b border-dark-border">
+              <tr>
+                <th class="p-3">Record ID</th>
+                <th class="p-3">Timestamp</th>
+                <th class="p-3">Question</th>
+                <th class="p-3">Action</th>
+                <th class="p-3">Verdict Count</th>
+                <th class="p-3 text-right">Inspect</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody" class="divide-y divide-dark-border font-mono">
+              <tr>
+                <td colspan="6" class="p-6 text-center text-slate-500 italic">No audit records generated yet. Run an Ask or Verify query first.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: ARCHITECTURE & API -->
+    <div id="tab-docs" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass p-5 rounded-2xl space-y-3">
+          <h2 class="text-base font-bold text-teal-300">🏗️ Context Anchor Architecture</h2>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Nova Context Anchor solves the critical problem of LLM hallucination and forgotten conversational facts through a 4-tier pipeline:
+          </p>
+          <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+            <li><strong class="text-white">1. LLM Extractor:</strong> Extracts facts, decisions, and commitments from conversation turns with verbatim source quotes.</li>
+            <li><strong class="text-white">2. Temporal Supersession:</strong> Automatically marks outdated decisions as <code class="text-amber-300 bg-slate-900 px-1 py-0.5 rounded">SUPERSEDED</code> when new decisions are made.</li>
+            <li><strong class="text-white">3. Hybrid Memory Retrieval:</strong> Combines exact subject lookup with semantic hash embeddings.</li>
+            <li><strong class="text-white">4. Evidence Judge & Claim Splitter:</strong> Atomically labels claims as <span class="text-emerald-400">supported</span>, <span class="text-rose-400">contradicted</span>, <span class="text-amber-400">outdated</span>, or <span class="text-slate-400">unsupported</span>.</li>
+          </ul>
+        </div>
+
+        <div class="glass p-5 rounded-2xl space-y-3">
+          <h2 class="text-base font-bold text-teal-300">⚡ API Endpoints Specification</h2>
+          <div class="space-y-2 text-xs font-mono">
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span class="text-emerald-400 font-bold">POST</span>
+              <span class="text-white">/ingest</span>
+              <span class="text-slate-400">Extracts & stores memories</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span class="text-teal-400 font-bold">POST</span>
+              <span class="text-white">/ask</span>
+              <span class="text-slate-400">Answers with evidence citation</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span class="text-blue-400 font-bold">POST</span>
+              <span class="text-white">/verify</span>
+              <span class="text-slate-400">Verifies answer against memory</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span class="text-purple-400 font-bold">GET</span>
+              <span class="text-white">/audit/{id}</span>
+              <span class="text-slate-400">Tamper-evident audit record</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span class="text-green-400 font-bold">GET</span>
+              <span class="text-white">/healthz</span>
+              <span class="text-slate-400">Service health check</span>
+            </div>
+          </div>
+          <div class="pt-2">
+            <a id="linkSwagger" href="/docs" target="_blank" class="inline-flex items-center space-x-1.5 text-xs text-teal-400 hover:text-teal-300 font-semibold underline underline-offset-4">
+              <span>Open Interactive Swagger Docs (/docs)</span>
+              <span>↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-dark-border py-6 bg-dark-card/40 text-center text-xs text-slate-500">
+    <p>Made in the group for the hackathon named <strong class="text-teal-400">Build With NOVA Hackathon</strong>.</p>
+    <p class="mt-1">Context Anchor AI &copy; 2026. All 208 benchmark & verification tests passing.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

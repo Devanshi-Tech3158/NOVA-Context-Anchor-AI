@@ -1,14 +1,16 @@
 """FastAPI gateway exposing endpoints for memory ingestion, QA, and verification."""
 
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 
 from nova.audit.logger import AuditError, AuditLog, AuditRecord
 from nova.core.config import get_settings
-from nova.core.llm import FakeLLM
+from nova.core.llm import FakeLLM, GeminiLLM, HeuristicLLM, OpenAILLM
 from nova.core.schemas import Decision, IngestReport, Message
 from nova.extraction.extractor import ExtractionError, LLMExtractor
 from nova.pipeline import Anchor
@@ -16,6 +18,8 @@ from nova.retrieval.embedder import HashEmbedder
 from nova.retrieval.hybrid import HybridRetriever
 from nova.store.sqlite_store import SqliteMemoryStore, StoreError
 from nova.verification.claim_splitter import VerificationError
+
+WEB_DIR = Path(__file__).resolve().parent.parent.parent / "web"
 
 
 class IngestRequest(BaseModel):
@@ -52,14 +56,39 @@ def get_anchor() -> Anchor:
     store = SqliteMemoryStore(settings.db_path)
     embedder = HashEmbedder()
     retriever = HybridRetriever(store, embedder)
-    extractor = LLMExtractor(FakeLLM())
+
+    # Pick LLM based on settings or keys
+    if settings.gemini_api_key:
+        model = settings.llm_model if settings.llm_model != "fake-model" else "gemini-1.5-flash"
+        llm = GeminiLLM(settings.gemini_api_key, model=model)
+    elif settings.openai_api_key:
+        model = settings.llm_model if settings.llm_model != "fake-model" else "gpt-4o-mini"
+        llm = OpenAILLM(settings.openai_api_key, model=model)
+    elif settings.llm_provider != "fake":
+        llm = HeuristicLLM()
+    else:
+        llm = FakeLLM()
+
+    extractor = LLMExtractor(llm)
     audit_log = AuditLog(settings.db_path)
     return Anchor(store=store, extractor=extractor, retriever=retriever, audit_log=audit_log)
 
 
 def create_app() -> FastAPI:
     """Create and configure FastAPI application instance with error handlers."""
-    application = FastAPI(title="Nova API Gateway")
+    application = FastAPI(
+        title="Nova API Gateway",
+        description="Context Anchor: External source-linked memory + evidence-checked answers",
+        version="0.1.0",
+    )
+
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     @application.exception_handler(ExtractionError)
     async def extraction_handler(request: Request, exc: ExtractionError) -> JSONResponse:
@@ -86,6 +115,38 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=501, content={"error": "NotImplementedError", "detail": str(exc)}
         )
+
+    @application.get("/")
+    def root_endpoint(request: Request):
+        accept = request.headers.get("accept", "")
+        if "text/html" in accept:
+            index_path = WEB_DIR / "index.html"
+            if index_path.exists():
+                return HTMLResponse(content=index_path.read_text(encoding="utf-8"))
+        return {
+            "name": "Nova API Gateway",
+            "version": "0.1.0",
+            "hackathon": "Build With NOVA Hackathon",
+            "status": "online",
+            "docs_url": "/docs",
+            "endpoints": {
+                "ingest": "POST /ingest",
+                "ask": "POST /ask",
+                "verify": "POST /verify",
+                "audit": "GET /audit/{id}",
+                "healthz": "GET /healthz",
+            },
+        }
+
+    @application.get("/app.js")
+    def app_js_endpoint():
+        js_path = WEB_DIR / "app.js"
+        if js_path.exists():
+            return HTMLResponse(
+                content=js_path.read_text(encoding="utf-8"),
+                media_type="application/javascript",
+            )
+        raise HTTPException(status_code=404, detail="File not found")
 
     @application.post("/ingest", response_model=IngestReport)
     def ingest_endpoint(

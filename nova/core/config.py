@@ -15,6 +15,7 @@ class Settings(BaseModel):
     llm_model: str = Field(default="fake-model")
     openai_api_key: str | None = Field(default=None)
     anthropic_api_key: str | None = Field(default=None)
+    gemini_api_key: str | None = Field(default=None)
     log_level: str = Field(default="INFO")
 
     @classmethod
@@ -28,6 +29,7 @@ class Settings(BaseModel):
             llm_model=os.getenv("NOVA_LLM_MODEL", "fake-model"),
             openai_api_key=os.getenv("OPENAI_API_KEY"),
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
+            gemini_api_key=os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
         )
 
