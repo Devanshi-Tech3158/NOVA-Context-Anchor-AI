@@ -29,6 +29,9 @@ target-version = "py311"
 testpaths = ["tests"]
 
 
+[tool.setuptools.packages.find]
+include = ["nova*"]
+
 [tool.vercel]
 entrypoint = "nova.api.main:app"
 pythonpath = ["."]
