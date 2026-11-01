@@ -5,7 +5,7 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel
 
 from nova.audit.logger import AuditError, AuditLog, AuditRecord
@@ -147,6 +147,13 @@ def create_app() -> FastAPI:
                 media_type="application/javascript",
             )
         raise HTTPException(status_code=404, detail="File not found")
+
+    @application.get("/preview.png")
+    def preview_png_endpoint():
+        img_path = WEB_DIR / "preview.png"
+        if img_path.exists():
+            return FileResponse(img_path, media_type="image/png")
+        raise HTTPException(status_code=404, detail="Preview image not found")
 
     @application.post("/ingest", response_model=IngestReport)
     def ingest_endpoint(
